@@ -117,12 +117,19 @@ async function grepAnkiCards() {
     
     // Show sentences that would be affected
     console.log('The following sentences would be modified:');
-    for (const card of uniqueCards) {
+    const nonEmptyCards = uniqueCards.filter(card => {
       const frontValue = card?.fields?.Front?.value;
-      if (frontValue) {
-        const textWithoutSound = removeSoundTags(renderHtml(frontValue));
-        console.log(`\nCard #${uniqueCards.indexOf(card) + 1}: ${renderHtml(textWithoutSound)}`);
-      }
+      if (!frontValue) return false;
+      const textWithoutSound = removeSoundTags(renderHtml(frontValue));
+      return textWithoutSound.trim() !== '';
+    });
+
+    console.log(`Found ${nonEmptyCards.length} non-empty cards out of ${uniqueCards.length} total cards.\n`);
+    
+    for (const card of nonEmptyCards) {
+      const frontValue = card?.fields?.Front?.value;
+      const textWithoutSound = removeSoundTags(renderHtml(frontValue));
+      console.log(`\nCard #${nonEmptyCards.indexOf(card) + 1}: ${renderHtml(textWithoutSound)}`);
     }
     
     // Ask for approval only if there are cards to modify
@@ -146,12 +153,12 @@ async function grepAnkiCards() {
     // If approved, proceed with modifications
     console.log('\nProceeding with modifications...');
     
-    // Process all cards with concurrency limit
-    const results = await processBatchWithConcurrency(uniqueCards);
+    // Process only non-empty cards with concurrency limit
+    const results = await processBatchWithConcurrency(nonEmptyCards);
     
     // Count successes and failures
     const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-    const failed = uniqueCards.length - successful;
+    const failed = nonEmptyCards.length - successful;
     
     console.log(`\nProcessing complete:`);
     console.log(`- Successfully added audio to ${successful} cards`);
