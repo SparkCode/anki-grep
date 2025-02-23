@@ -10,6 +10,7 @@ A Node.js tool that automatically enriches Anki cards with text-to-speech (TTS) 
    - Go to Tools > Add-ons > Get Add-ons
    - Enter code: 2055492159
    - Restart Anki
+3. OpenAI API key (set as OPENAI_API_KEY environment variable)
 
 ## Installation
 
@@ -20,7 +21,10 @@ npm install
 ## Features
 
 - Automatically detects cards without audio
-- Generates high-quality TTS audio for card content
+- Generates high-quality TTS audio using OpenAI's API:
+  - Uses the latest tts-1 model
+  - Randomly selects from 6 different voices (alloy, echo, fable, onyx, nova, shimmer)
+  - Creates natural-sounding speech with proper intonation
 - Batch processes cards with concurrency control
 - Deduplicates cards by note ID to avoid redundant processing
 - Interactive confirmation before making changes
