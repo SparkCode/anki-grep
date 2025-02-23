@@ -1,8 +1,11 @@
 {
-  "name": "anki-grep",
+  "name": "tts-update",
   "version": "1.0.0",
-  "description": "An example npm package to retrieve (grep) 100 Anki cards from a specific deck",
+  "description": "CLI tool to add OpenAI TTS audio to Anki cards",
   "main": "src/index.js",
+  "bin": {
+    "tts-update": "./src/index.js"
+  },
   "scripts": {
     "start": "node src/index.js",
     "build": "chmod +x src/index.js",
