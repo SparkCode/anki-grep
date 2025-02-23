@@ -90,7 +90,7 @@ function removeSoundTags(text) {
 async function grepAnkiCards() {
   try {
     // Step 1: Find card IDs in the deck
-    const allCardIds = await findCards('prop:due<=100  -deck:"+170 English Irregular verbs"');
+    const allCardIds = await findCards('-deck:"+170 English Irregular verbs"');
 
     // Step 2: Slice to the first MAX_CARDS IDs if there are more
     const limitedCardIds = allCardIds.slice(0, MAX_CARDS);
