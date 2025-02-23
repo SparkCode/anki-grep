@@ -17,11 +17,11 @@ async function processBatchWithConcurrency(items, maxConcurrent = 10) {
 
   async function processCard(card, index) {
     try {
-      const fieldText = card?.fields?.Front?.value || card?.fields?.phrase?.value;
-      if (!fieldText) {
-        throw new Error('Card text field is missing or invalid');
+      const currentFront = card?.fields?.Front?.value;
+      if (!currentFront) {
+        throw new Error('Card front field is missing or invalid');
       }
-      const textWithoutSound = removeSoundTags(fieldText);
+      const textWithoutSound = removeSoundTags(currentFront);
       const text = renderHtml(textWithoutSound);
       
       console.log(`\nProcessing Card #${index + 1} [ID: ${card.cardId}]`);
@@ -30,10 +30,11 @@ async function processBatchWithConcurrency(items, maxConcurrent = 10) {
       const audioFilepath = await generateTTS(text);
       const audioFilename = audioFilepath.split('/').pop();
       const audioTag = `[sound:${audioFilename}]`;
+      const newFront = currentFront + '<br><br>' + audioTag;
       
-      // Update the appropriate field based on which one exists
-      const updateFields = card.fields.Front ? { Front: text + '<br><br>' + audioTag } : { phraseSound: audioTag };
-      await updateNoteFields(card.note, updateFields);
+      await updateNoteFields(card.note, {
+        Front: newFront
+      });
       
       // Store the audio file in Anki
       await storeMediaFile(audioFilepath);
@@ -89,18 +90,13 @@ function removeSoundTags(text) {
 async function grepAnkiCards() {
   try {
     // Step 1: Find card IDs in the deck
-    const allCardIds = await findCards('prop:due<=10 -deck:"+170 English Irregular verbs"');
+    const allCardIds = await findCards('prop:due<=100  -deck:"+170 English Irregular verbs"');
 
     // Step 2: Slice to the first MAX_CARDS IDs if there are more
     const limitedCardIds = allCardIds.slice(0, MAX_CARDS);
     
     // Step 3: Retrieve info about these cards
     const cardsInfo = await getCardsInfo(limitedCardIds);
-    
-    // Log the first card's structure to understand available fields
-    if (cardsInfo.length > 0) {
-      console.log('First card structure:', JSON.stringify(cardsInfo[0], null, 2));
-    }
     
     // Step 4: Filter cards without audio and deduplicate by note ID
     const cardsWithoutAudio = cardsInfo.filter(card => !hasAudio(card));
@@ -124,9 +120,9 @@ async function grepAnkiCards() {
     // Show sentences that would be affected
     console.log('The following sentences would be modified:');
     for (const card of uniqueCards) {
-      const fieldText = card?.fields?.Front?.value || card?.fields?.phrase?.value;
-      if (fieldText) {
-        const textWithoutSound = removeSoundTags(renderHtml(fieldText));
+      const frontValue = card?.fields?.Front?.value;
+      if (frontValue) {
+        const textWithoutSound = removeSoundTags(renderHtml(frontValue));
         console.log(`\nCard #${uniqueCards.indexOf(card) + 1}: ${renderHtml(textWithoutSound)}`);
       }
     }
@@ -144,7 +140,7 @@ async function grepAnkiCards() {
       });
     });
 
-    if (response !== 'yes') {
+    if (response !== 'yes' && response !== 'y') {
       console.log('Operation cancelled.');
       return;
     }

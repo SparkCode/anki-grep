@@ -128,5 +128,5 @@ export async function getCardsInfo(cardIds) {
  */
 export function hasAudio(card) {
   const soundRegex = /\[sound:.+?\]/;
-  return card?.fields?.phraseSound?.value ? soundRegex.test(card.fields.phraseSound.value) : false;
+  return card?.fields?.Front?.value ? soundRegex.test(card.fields.Front.value) : false;
 }
