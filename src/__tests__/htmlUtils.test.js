@@ -46,4 +46,14 @@ describe('renderHtml', () => {
     `;
     expect(renderHtml(html)).toBe('Hello world');
   });
+
+  test('removes multiple phonetic transcriptions from a sentence', () => {
+    const html = 'He lost control of his car when a front/rear wheel /wiːl/ hit a rock as he approached the first bend /bend/';
+    expect(renderHtml(html)).toBe('He lost control of his car when a front/rear wheel hit a rock as he approached the first bend');
+  });
+
+  test('removes phonetic transcription with diacritical marks', () => {
+    const html = 'Despite being the underdog /ˈʌndədɒɡ/, the startup managed to disrupt the entire industry with its innovation.';
+    expect(renderHtml(html)).toBe('Despite being the underdog , the startup managed to disrupt the entire industry with its innovation.');
+  });
 });

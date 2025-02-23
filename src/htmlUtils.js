@@ -28,8 +28,10 @@ export function renderHtml(html) {
   text = text
     // Remove .idiom suffix
     .replace(/\.idiom/g, '')
-    // Remove phonetic transcriptions
-    .replace(/\s*\/[^/]+\/\s*/g, ' ')
+    // First normalize all whitespace to ensure consistent spacing
+    .replace(/\s+/g, ' ')
+    // Remove phonetic transcriptions that are properly isolated (preserving one space between words)
+    .replace(/(\s*)\/[^/]+\/(?=\s|$|[,.!?])/g, '$1')
     // Clean up extra whitespace
     .replace(/\s+/g, ' ')
     .trim();

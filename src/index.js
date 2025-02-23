@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { MAX_CARDS } from './config.js';
 import { generateTTS } from './ttsService.js';
 import { findCards, getCardsInfo, hasAudio, storeMediaFile, updateNoteFields } from './ankiService.js';
 import { renderHtml } from './htmlUtils.js';
@@ -92,8 +91,7 @@ async function grepAnkiCards() {
     // Step 1: Find card IDs in the deck
     const allCardIds = await findCards('-deck:"+170 English Irregular verbs"');
 
-    // Step 2: Slice to the first MAX_CARDS IDs if there are more
-    const limitedCardIds = allCardIds.slice(0, MAX_CARDS);
+    const limitedCardIds = allCardIds;
     
     // Step 3: Retrieve info about these cards
     const cardsInfo = await getCardsInfo(limitedCardIds);
