@@ -6,14 +6,17 @@ import { JSDOM } from 'jsdom';
  * @returns {string} The rendered text content
  */
 export function renderHtml(html) {
+  // Remove leading/trailing quotes if present
+  html = html.replace(/^['"]|['"]$/g, '');
+  
   const dom = new JSDOM(html);
   const div = dom.window.document.createElement('div');
-  div.innerHTML = html;
   
   // Process HTML and convert to text
   div.innerHTML = html
     .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/(p|div|h[1-6]|li)>/gi, '\n');
+    .replace(/<\/(p|div|h[1-6]|li)>/gi, '\n')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ''); // Remove style tags and their content
   
   // Get text content and split by newlines
   let lines = (div.textContent || div.innerText || '')
@@ -30,8 +33,13 @@ export function renderHtml(html) {
     .replace(/\.idiom/g, '')
     // First normalize all whitespace to ensure consistent spacing
     .replace(/\s+/g, ' ')
-    // Remove phonetic transcriptions that are properly isolated (preserving one space between words)
-    .replace(/(\s*)\/[^/]+\/(?=\s|$|[,.!?])/g, '$1')
+    // Special handling for phonetic transcription with comma
+    .replace(/\/[^/]+\/,/g, ' ,')
+    // Remove phonetic transcriptions with their slashes
+    // The lookbehind ensures we don't match text like front/rear where / is part of the content
+    .replace(/(?<![a-zA-Z]) ?\/[^/]+\/ ?/g, ' ')
+    // Fix spacing around punctuation
+    .replace(/\s+([.!?])/g, '$1')
     // Clean up extra whitespace
     .replace(/\s+/g, ' ')
     .trim();
